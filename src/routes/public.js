@@ -1,5 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const multer = require('multer');
+const crypto = require('crypto');
 const express = require('express');
 const { Web3 } = require('web3');
 const {
@@ -38,13 +39,22 @@ router.post('/storeFile', upload.single('file'), async (req, res) => {
 
     const chunkArr = chunkBase64String(b64FileContent, avgChunkSize);
 
-    const getStorageNodes = await fileStorageContract.methods.storeFileInNodes(chunkArr).call();
+    const getStorageNodes = await fileStorageContract.methods
+      .storeFile(chunkArr, originalname, originalname, encoding, crypto.randomUUID(), `${size}`)
+      .call();
 
     const chunksBuffer = getBufferFromArr(chunkArr);
 
     const fileHash = getFileHash(chunksBuffer);
 
-    console.log('fileBuffer', b64FileContent, chunksBuffer, avgChunkSize, maxNumChunkDuplication);
+    console.log(
+      'fileBuffer',
+      b64FileContent,
+      chunksBuffer,
+      avgChunkSize,
+      maxNumChunkDuplication,
+      crypto.randomUUID()
+    );
 
     res.send('Success');
   } catch (err) {
